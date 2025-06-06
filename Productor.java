@@ -1,48 +1,59 @@
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+
 import java.io.*;
 
-public class Productor extends Thread{
-    
-    LinkedList<String>memoriaCompartida = new LinkedList<>();
+public class Productor extends Thread {
+    Estadisticas estadisticas;
+    BlockingQueue<String> memoriaCompartida1;
 
-    public Productor ( LinkedList<String>memoriaCompartida){
-        
-        this.memoriaCompartida = memoriaCompartida;
+    public Productor(BlockingQueue<String> memoriaCompartida1, Estadisticas estadisticas) {
+        this.memoriaCompartida1 = memoriaCompartida1;
+        this.estadisticas = estadisticas;
     }
 
     @Override
-    public void run (){
+    public void run() {
         Scanner entrada = new Scanner(System.in);
-        System.out.println("okey, introduce el nombre del fichero pues");
+        System.out.println("Introduce el nombre del archivo");
         String nombreFichero = entrada.nextLine();
+        estadisticas.iniciar();
 
-       
         File archivo = new File(nombreFichero);
 
         if (archivo.exists() && archivo.isFile()) {
-            
+
             try (Scanner lector = new Scanner(archivo)) {
                 while (lector.hasNextLine()) {
                     String linea = lector.nextLine();
-                    String []palabraPorPalabra = linea.split(" ");
-                   
+                    estadisticas.aumentarPalabrasProductor();
 
-                    for (String palabras : palabraPorPalabra){
-                        memoriaCompartida.add(palabras);
+                    String[] palabraPorPalabra = linea.split(" ");
+
+                    for (String palabras : palabraPorPalabra) {
+                        try {
+                            memoriaCompartida1.put(palabras + " ");
+                         
+                        } catch (Exception e) {
+                            System.out.println("Error");
+                        }
                     }
-                  
+                    //
+                    try {
+                        Thread.sleep(6000);
+                    } catch (Exception e) {
+                        System.out.println("no puedo leer bien las lineas cada segundo" + e.getMessage());
+                    }
+
                 }
-                
+
             } catch (FileNotFoundException e) {
-                System.out.println("me da que no hemos podido leer el fcihero");
+                System.out.println("error al intentar leer el archivo");
             }
         } else {
-            System.out.println("ezzz ");
-            System.out.println("estas aca: " + new File(".").getAbsolutePath());
+            System.out.println("tu ubicación actual es: " + new File(".").getAbsolutePath());
 
         }
         entrada.close();
     }
-    }
-
-
+}

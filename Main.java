@@ -1,27 +1,20 @@
-import java.util.LinkedList;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
 
-
     public static void main(String[] args) {
+        BlockingQueue<String> memoriaCompartida = new LinkedBlockingQueue<>();
+        Estadisticas estadisticas = new Estadisticas(memoriaCompartida);
 
-    LinkedList<String>memoriaCompartida = new LinkedList<>();
-
-    Productor  productor = new Productor(memoriaCompartida);
-    Consumidor consumidor = new Consumidor(memoriaCompartida);
-
-    productor.start();
-    
-    try {
-        productor.join();
-    } catch (Exception e) {
-        System.out.println("OSTRAS QUE CARENCIAS");
-    }
-    consumidor.start();
-
+        Productor productor = new Productor(memoriaCompartida, estadisticas);
+        Consumidor consumidor = new Consumidor(memoriaCompartida, estadisticas);
+       
+        productor.start();
+        estadisticas.start();
+        consumidor.start();
 
     }
-
-
 
 }

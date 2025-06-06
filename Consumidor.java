@@ -1,25 +1,35 @@
-import java.util.*;
-import java.io.*; 
 
-public class Consumidor extends Thread{
-    
+import java.util.concurrent.BlockingQueue;
 
-    LinkedList<String> memoriaCompartida = new LinkedList<>();
+import java.io.*;
 
-    public Consumidor (LinkedList<String> memoriaCompartida){
-        this.memoriaCompartida = memoriaCompartida; 
+public class Consumidor extends Thread {
+    Estadisticas estadisticas;
+    BlockingQueue<String> memoriaCompartida1;
+   
+
+    public Consumidor(BlockingQueue<String> memoriaCompartida1, Estadisticas estadisticas) {
+        this.memoriaCompartida1 = memoriaCompartida1;
+        this.estadisticas = estadisticas; 
     }
 
     @Override
-    public void run (){
-        try (FileWriter writer = new FileWriter("ArchivoConMayusc.txt")){
-           for (String palabra : memoriaCompartida){
-            writer.write(palabra.toUpperCase()+" ");
-        } 
+    public void run() {
+        try (FileWriter writer = new FileWriter("ArchivoConMayusc.txt")) {
+
+            while (true) {
+                String palabra = memoriaCompartida1.take();
+                writer.write(palabra.toUpperCase() + "\n");
+                writer.flush();
+                estadisticas.aumentarPalabrasConsumidor();
+                Thread.sleep(1000);
+               
+            }
+
         } catch (Exception e) {
-            System.out.println("No hemos podido pasar lo que hay en la memoria compartida a mayúsculas mi loco");
+            System.out.println("error al escribir el nuevo archivo");
         }
-        
+
     }
-    
+
 }
